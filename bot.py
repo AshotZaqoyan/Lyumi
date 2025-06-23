@@ -3,6 +3,7 @@ import logging
 import asyncio
 from config import DISCORD_TOKEN
 from llm_manager import AnythingLLMManager
+from responses import ATTACHED_FILE
 
 logging.basicConfig(
     level=logging.INFO,
@@ -23,6 +24,11 @@ async def on_ready():
 @client.event
 async def on_message(message):
     if message.author == client.user or not isinstance(message.channel, discord.DMChannel):
+        return
+    
+    if message.attachments:
+        await message.reply(ATTACHED_FILE)
+        logging.warning(f"User {message.author.id} tried to send an attachment.")
         return
 
     snippet = message.content[:200] + ("..." if len(message.content) > 200 else "")

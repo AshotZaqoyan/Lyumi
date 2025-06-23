@@ -1,96 +1,18 @@
-# 🚀 AnythingLLM + Ollama Docker Installation Guide
+# 🚀 AnythingLLM Docker Installation Guide (OpenAI Only)
 
-This guide will help you deploy **AnythingLLM** and **Ollama** together using Docker Compose to power a local, private AI assistant. It includes everything from installation to embedding model setup, LLM configuration, and API key generation.
+This guide will help you deploy **AnythingLLM** using Docker Compose to power a local AI assistant using **OpenAI** as both the LLM and embedding provider. It includes everything from installation to embedding setup, configuration, and API key generation.
 
 ---
 
 ## 📦 Quick Start
 
-### ✅ Option 1: Combined Setup (Recommended)
-
-Use this method if you're setting up both services on the same machine.
+### ✅ Setup with Docker Compose
 
 Create a `docker-compose.yml` file:
 
 ```yaml
 version: '3.8'
 services:
-  ollama:
-    image: ollama/ollama
-    container_name: ollama
-    volumes:
-      - ollama_data:/root/.ollama
-    ports:
-      - "11434:11434"
-    restart: unless-stopped
-    networks:
-      - ai_network
-
-  anythingllm:
-    image: mintplexlabs/anythingllm
-    container_name: anythingllm
-    depends_on:
-      - ollama
-    ports:
-      - "3001:3001"
-    cap_add:
-      - SYS_ADMIN
-    environment:
-      - STORAGE_DIR=/app/server/storage
-      - JWT_SECRET=${JWT_SECRET:-$(openssl rand -hex 32)}
-      - LLM_PROVIDER=openai
-      - OPEN_MODEL_PREF=gpt-4o-mini
-      - EMBEDDING_ENGINE=ollama
-      - EMBEDDING_BASE_PATH=http://ollama:11434
-      - EMBEDDING_MODEL_PREF=nomic-embed-text:latest
-      - EMBEDDING_MODEL_MAX_CHUNK_LENGTH=8192
-      - VECTOR_DB=lancedb
-      - WHISPER_PROVIDER=local
-      - TTS_PROVIDER=native
-      - PASSWORDMINCHAR=8
-    volumes:
-      - anythingllm_storage:/app/server/storage
-    restart: always
-    networks:
-      - ai_network
-
-volumes:
-  ollama_data:
-  anythingllm_storage:
-
-networks:
-  ai_network:
-    driver: bridge
-```
-
----
-
-### 🧩 Option 2: Separate Services
-
-For advanced users running containers individually.
-
-**ollama-compose.yml**
-
-```yaml
-version: "3.8"
-services:
-  ollama:
-    image: ollama/ollama
-    container_name: ollama
-    volumes:
-      - ollama:/root/.ollama
-    ports:
-      - "11434:11434"
-    restart: unless-stopped
-volumes:
-  ollama:
-```
-
-**anythingllm-compose.yml**
-
-```yaml
-version: '3.8'
-services:
   anythingllm:
     image: mintplexlabs/anythingllm
     container_name: anythingllm
@@ -103,10 +25,8 @@ services:
       - JWT_SECRET=${JWT_SECRET:-$(openssl rand -hex 32)}
       - LLM_PROVIDER=openai
       - OPEN_MODEL_PREF=gpt-4o-mini
-      - EMBEDDING_ENGINE=ollama
-      - EMBEDDING_BASE_PATH=http://127.0.0.1:11434
-      - EMBEDDING_MODEL_PREF=nomic-embed-text:latest
-      - EMBEDDING_MODEL_MAX_CHUNK_LENGTH=8192
+      - EMBEDDING_ENGINE='openai'
+      - EMBEDDING_MODEL_PREF=text-embedding-3-small # or text-embedding-ada-002
       - VECTOR_DB=lancedb
       - WHISPER_PROVIDER=local
       - TTS_PROVIDER=native
@@ -122,32 +42,15 @@ volumes:
 
 ## ⚙️ Setup Instructions
 
-### 1. Run Docker Services
-
-**Combined Setup:**
+### 1. Run Docker Service
 
 ```bash
 docker compose up -d
 ```
 
-**Separate Setup:**
-
-```bash
-docker compose -f ollama-compose.yml up -d
-docker compose -f anythingllm-compose.yml up -d
-```
-
 ---
 
-### 2. Install Embedding Model
-
-```bash
-docker exec -it ollama ollama pull nomic-embed-text
-```
-
----
-
-### 3. Configure AnythingLLM
+### 2. Configure AnythingLLM
 
 Visit: [http://localhost:3001](http://localhost:3001)
 
@@ -159,22 +62,17 @@ Visit: [http://localhost:3001](http://localhost:3001)
 
 #### 📚 Embedding:
 
-* **Embedding Provider**: `Ollama` (recommended)
-* **Embedding Model**: `nomic-embed-text:latest` (recommended)
-* **Embedding Base URL**:
-
-  * `http://ollama:11434` (Combined setup)
-  * `http://127.0.0.1:11434` (Separate setup)
+* **Embedding Provider**: `OpenAI`
 
 #### 🔐 Security:
 
 * Go to **Settings → Security**
-* Enable **Multi-User Mode** (recommended if there are several users otherwise enable **Password Protect Instance**)
+* Enable **Multi-User Mode** (recommended if there are several users, otherwise enable **Password Protect Instance**)
 * Set and save a **strong password**
 
 ---
 
-### 4. Generate API Key
+### 3. Generate API Key
 
 * Go to **Settings → API Keys**
 * Click **Create New API Key**
@@ -182,7 +80,7 @@ Visit: [http://localhost:3001](http://localhost:3001)
 
 ---
 
-### 🧠 5. Create a Workspace & Embed Example Document
+### 🧠 4. Create a Workspace & Embed Example Document
 
 After generating your API key:
 
@@ -242,8 +140,8 @@ docker compose down -v
 * Always use strong passwords
 * Keep your API keys safe
 * Set up reverse proxy for production (e.g. Nginx with HTTPS)
-* Regularly back up your volumes (`ollama_data`, `anythingllm_storage`)
+* Regularly back up your volumes (`anythingllm_storage`)
 
 ---
 
-🎉 **You're all set!** You now have a full local AI assistant powered by AnythingLLM + Ollama. Enjoy embedding-rich conversations with custom documents in a secure, private environment. Now you can go [here](../README.md) and continue.
+🎉 **You're all set!** You now have a full local AI assistant powered by AnythingLLM with OpenAI. Enjoy embedding-rich conversations with custom documents in a secure, private environment.

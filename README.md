@@ -1,6 +1,6 @@
 # 📘 Lyumi Deployment Guide
 
-This guide explains how to run the Lyumi Discord AI bot persistently across different systems, and how to deploy it reliably on a Linux server. First of all, you need to have AnythingLLM and Ollama set up. For how to do that go [here](docker/anythingllm-ollama.md).
+This guide explains how to run the Lyumi Discord AI bot persistently across different systems, and how to deploy it reliably on a Linux server. First of all, you need to have AnythingLLM set up. For how to do that go [here](docker/anythingllm.md).
 
 ---
 

@@ -1,10 +1,10 @@
 import aiohttp
-import asyncio
 import os
 import pickle
 import logging
 from datetime import datetime
 from config import ANYTHINGLLM_API_KEY, ANYTHINGLLM_BASE_URL, WORKSPACE_SLUG, CACHE_FILE
+from responses import USER_ERROR_MSG
 
 logging.basicConfig(
     level=logging.INFO,
@@ -92,7 +92,7 @@ class AnythingLLMManager:
     async def send_message_to_thread(self, user_id, message):
         slug = await self.get_or_create_thread(user_id)
         if not slug:
-            return "Սխալ առաջացավ, փորձեք մի փոքր ուշ կամ դիմեք IT բաժնին"
+            return USER_ERROR_MSG
 
         data = {'message': message, 'mode': 'chat'}
         async with aiohttp.ClientSession() as session:
@@ -100,7 +100,11 @@ class AnythingLLMManager:
                 async with session.post(f"{ANYTHINGLLM_BASE_URL}/workspace/{WORKSPACE_SLUG}/thread/{slug}/chat", headers=self.headers, json=data) as resp:
                     if resp.status == 200:
                         result = await resp.json()
-                        return result.get('textResponse', 'Պատասխան չստացվեց։')
+                        text_response = result.get('textResponse')
+                        if not text_response:
+                            logging.warning(f"No 'textResponse' field in API response for user {user_id}. Full response: {result}")
+                            return USER_ERROR_MSG
+                        return text_response
                     elif resp.status == 400:
                         logging.warning(f"Thread may be deleted or invalid. Recreating thread for user {user_id}.")
                         self.user_threads.pop(str(user_id), None)
@@ -108,7 +112,7 @@ class AnythingLLMManager:
                         return await self.send_message_to_thread(user_id, message)
                     error_text = await resp.text()
                     logging.error(f"Unexpected API response {resp.status} for user {user_id}: {error_text}")
-                    return "Սխալ առաջացավ, փորձեք մի փոքր ուշ կամ դիմեք IT բաժնին"
+                    return USER_ERROR_MSG
             except Exception as e:
                 logging.error(f"Error sending message: {e}")
-                return "Սխալ առաջացավ, փորձեք մի փոքր ուշ կամ դիմեք IT բաժնին"
+                return USER_ERROR_MSG
