@@ -25,7 +25,7 @@ services:
       - JWT_SECRET=${JWT_SECRET:-$(openssl rand -hex 32)}
       - LLM_PROVIDER=openai
       - OPEN_MODEL_PREF=gpt-4o-mini
-      - EMBEDDING_ENGINE='openai'
+      - EMBEDDING_ENGINE=openai
       - EMBEDDING_MODEL_PREF=text-embedding-3-small # or text-embedding-ada-002
       - VECTOR_DB=lancedb
       - WHISPER_PROVIDER=local
