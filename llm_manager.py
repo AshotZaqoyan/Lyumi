@@ -68,7 +68,7 @@ class AnythingLLMManager:
             return self.user_threads[str(user_id)]
 
         slug = f"user-{user_id}"
-        data = {'name': f'user_{user_id}', 'slug': slug}
+        data = {'userId': 1, 'name': f'user_{user_id}', 'slug': slug}
         async with aiohttp.ClientSession() as session:
             try:
                 async with session.post(f"{ANYTHINGLLM_BASE_URL}/workspace/{WORKSPACE_SLUG}/thread/new", headers=self.headers, json=data) as resp:
@@ -94,7 +94,7 @@ class AnythingLLMManager:
         if not slug:
             return USER_ERROR_MSG
 
-        data = {'message': message, 'mode': 'chat'}
+        data = {'userId': 1, 'message': message, 'mode': 'chat'}
         async with aiohttp.ClientSession() as session:
             try:
                 async with session.post(f"{ANYTHINGLLM_BASE_URL}/workspace/{WORKSPACE_SLUG}/thread/{slug}/chat", headers=self.headers, json=data) as resp:
